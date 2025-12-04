@@ -5,7 +5,7 @@ Demonstrerar hur MCP kan använda persistent state (Resources).
 
 import json
 from pathlib import Path
-from world import ROOMS, DEFAULT_STATE
+from world import LEVELS, DEFAULT_STATE
 
 STATE_FILE = Path(__file__).parent / "game_state.json"
 
@@ -22,14 +22,26 @@ def save_state(state: dict):
     STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def get_rooms(state: dict) -> dict:
+    """Hämtar rummen för nuvarande nivå."""
+    return LEVELS[state["current_level"]]["rooms"]
+
+
+def get_level_info(state: dict) -> dict:
+    """Hämtar info om nuvarande nivå."""
+    return LEVELS[state["current_level"]]
+
+
 def get_room_info() -> str:
     """Returnerar info om nuvarande rum (RESOURCE)."""
     state = load_state()
+    rooms = get_rooms(state)
+    level = get_level_info(state)
     room_id = state["current_room"]
-    room = ROOMS[room_id]
+    room = rooms[room_id]
 
     lines = [
-        f"{room['name']}",
+        f"[{level['name']}] {room['name']}",
         room['description'],
     ]
 
@@ -55,20 +67,42 @@ def get_inventory() -> str:
 def get_status() -> str:
     """Returnerar spelarens status (RESOURCE)."""
     state = load_state()
-    return f"HP: {state['hp']} | Besökta rum: {len(state['visited_rooms'])}/{len(ROOMS)}"
+    level = get_level_info(state)
+    rooms = get_rooms(state)
+    return f"Nivå: {state['current_level']} ({level['name']}) | HP: {state['hp']} | Rum: {len(state['visited_rooms'])}/{len(rooms)}"
 
 
 def move(direction: str) -> str:
     """Flyttar spelaren i en riktning (TOOL)."""
     state = load_state()
-    room = ROOMS[state["current_room"]]
+    rooms = get_rooms(state)
+    level = get_level_info(state)
+    room = rooms[state["current_room"]]
 
     if direction not in room["exits"]:
         available = ", ".join(room["exits"].keys())
         return f"Du kan inte gå '{direction}'. Tillgängliga: {available}"
 
     new_room_id = room["exits"][direction]
-    new_room = ROOMS[new_room_id]
+
+    # Hantera nivåbyte
+    if new_room_id == "NEXT_LEVEL":
+        goal_item = level["goal"]
+        if goal_item not in state["inventory"]:
+            return f"Portalen kräver '{goal_item}' för att aktiveras."
+
+        next_level = state["current_level"] + 1
+        if next_level not in LEVELS:
+            return "GRATTIS! Du har klarat alla nivåer!"
+
+        state["completed_levels"].append(state["current_level"])
+        state["current_level"] = next_level
+        state["current_room"] = "start"
+        state["visited_rooms"] = ["start"]
+        save_state(state)
+        return f"Du klev genom portalen!\n\n=== NIVÅ {next_level}: {LEVELS[next_level]['name'].upper()} ===\n\n{get_room_info()}"
+
+    new_room = rooms[new_room_id]
 
     # Kolla om rummet kräver ett föremål
     if new_room.get("requires"):
@@ -87,7 +121,8 @@ def move(direction: str) -> str:
 def pickup(item: str) -> str:
     """Plockar upp ett föremål (TOOL)."""
     state = load_state()
-    room = ROOMS[state["current_room"]]
+    rooms = get_rooms(state)
+    room = rooms[state["current_room"]]
     available_items = [i for i in room.get("items", []) if i not in state["inventory"]]
 
     if item not in available_items:
@@ -95,6 +130,11 @@ def pickup(item: str) -> str:
 
     state["inventory"].append(item)
     save_state(state)
+
+    # Kolla om det är nivåns mål
+    level = get_level_info(state)
+    if item == level["goal"]:
+        return f"Du plockar upp '{item}'! ✨ Detta är nyckeln till nästa nivå!"
 
     return f"Du plockar upp '{item}'!"
 
