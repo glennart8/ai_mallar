@@ -1,0 +1,19 @@
+{
+  "current_room": "flod",
+  "inventory": [
+    "fackla",
+    "guldmynt",
+    "krona",
+    "pinne",
+    "rep",
+    "magisk_sten"
+  ],
+  "hp": 100,
+  "visited_rooms": [
+    "start",
+    "grotta",
+    "skatt",
+    "flod",
+    "ö"
+  ]
+}
