@@ -23,14 +23,9 @@ def multiply(a: int, b: int) -> int:
 
 @mcp.tool()
 def get_weather(city: str) -> str:
-    """Hämtar väder för en stad (mock-data)."""
-    # MCOKDATA, annars API
-    weather_data = {
-        "Stockholm": "12°C, molnigt",
-        "Göteborg": "14°C, regn",
-        "Malmö": "15°C, soligt",
-    }
-    return weather_data.get(city, f"Okänd stad: {city}")
+    """Hämtar aktuellt väder för en stad (via wttr.in)."""
+    import weather
+    return weather.get_weather(city)
 
 
 @mcp.tool()

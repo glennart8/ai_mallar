@@ -20,43 +20,36 @@ async def main():
         command="python",
         args=["server.py"],
     )
-
-    async with stdio_client(server_params) as (read, write):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
+    
+    
+    async with stdio_client(server_params) as (read, write): # Startar server.py som subprocess
+        async with ClientSession(read, write) as session: # Skapar MCP-session med read/write streams
+            await session.initialize() # Handshake mellan klient och server
 
             # Hämta tillgängliga verktyg från MCP
             mcp_tools = await session.list_tools()
 
             # Konvertera MCP-verktyg till Gemini-format
-            gemini_tools = []
-            for tool in mcp_tools.tools:
-                # Bygg parameter-schema
-                properties = {}
-                required = []
-                if tool.inputSchema and "properties" in tool.inputSchema:
-                    for name, prop in tool.inputSchema["properties"].items():
-                        properties[name] = {
-                            "type": prop.get("type", "string"),
-                            "description": prop.get("description", "")
-                        }
-                        if tool.inputSchema.get("required") and name in tool.inputSchema["required"]:
-                            required.append(name)
+            # OBS: Gemini accepterar inte 'title' i schemat, så vi tar bort det rekursivt
+            def clean_schema(obj):
+                if not obj:
+                    return {"type": "object", "properties": {}}
+                if isinstance(obj, dict):
+                    return {k: clean_schema(v) for k, v in obj.items() if k != "title"}
+                return obj
 
-                gemini_tools.append({
+            gemini_tools = [
+                {
                     "name": tool.name,
                     "description": tool.description,
-                    "parameters": {
-                        "type": "object",
-                        "properties": properties,
-                        "required": required
-                    }
-                })
+                    "parameters": clean_schema(tool.inputSchema)
+                }
+                for tool in mcp_tools.tools
+            ]
 
             print("Tillgängliga verktyg för AI:")
             for t in gemini_tools:
                 print(f"  - {t['name']}: {t['description']}")
-            print()
 
             # Skapa Gemini-modell med verktyg och system prompt
             model = genai.GenerativeModel(

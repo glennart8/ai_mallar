@@ -1,3 +1,4 @@
 mcp
 google-generativeai
 python-dotenv
+httpx
