@@ -1,19 +1,12 @@
 {
-  "current_room": "flod",
+  "current_room": "skatt",
   "inventory": [
-    "fackla",
-    "guldmynt",
-    "krona",
-    "pinne",
-    "rep",
-    "magisk_sten"
+    "fackla"
   ],
   "hp": 100,
   "visited_rooms": [
     "start",
     "grotta",
-    "skatt",
-    "flod",
-    "ö"
+    "skatt"
   ]
 }
