@@ -10,21 +10,75 @@ MCP är Anthropics öppna standard för att koppla AI-assistenter till externa v
 - **Resources** - Data som AI:n kan läsa
 - **Prompts** - Fördefinierade promptmallar
 
+## Arkitektur
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        AI-KLIENT                            │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │
+│  │  Användare  │───▶│   Gemini    │───▶│ MCP-klient  │     │
+│  └─────────────┘    └─────────────┘    └──────┬──────┘     │
+└───────────────────────────────────────────────┼─────────────┘
+                                                │
+                              MCP-protokoll (stdio)
+                                                │
+┌───────────────────────────────────────────────▼─────────────┐
+│                       MCP-SERVER                            │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │    add()    │  │ multiply()  │  │get_weather()│   ...   │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Flöde: Användare → AI → Tool → Svar
+
+```
+1. Användare: "Vad är 15 * 8?"
+        │
+        ▼
+2. Gemini analyserar frågan och ser tillgängliga verktyg
+        │
+        ▼
+3. Gemini bestämmer: "Jag behöver använda multiply()"
+        │
+        ▼
+4. AI-klienten anropar MCP-servern: multiply(a=15, b=8)
+        │
+        ▼
+5. MCP-servern kör funktionen och returnerar: 120
+        │
+        ▼
+6. Resultatet skickas tillbaka till Gemini
+        │
+        ▼
+7. Gemini formulerar svar: "15 gånger 8 är 120."
+```
+
 ## Installation
 
 ```bash
-pip install mcp
+pip install -r requirements.txt
 ```
 
 ## Användning
 
-### Alternativ 1: Kör direkt
+### Alternativ 1: Enkel test-klient
 
 ```bash
-mcp run server.py
+python client.py
 ```
 
-### Alternativ 2: Claude Desktop
+Startar servern, listar verktyg och testar alla funktioner automatiskt.
+
+### Alternativ 2: AI-klient med Gemini
+
+```bash
+python ai_client.py
+```
+
+Chatta med Gemini som automatiskt använder MCP-verktygen vid behov.
+
+### Alternativ 3: Claude Desktop
 
 Lägg till i `claude_desktop_config.json`:
 
@@ -42,7 +96,13 @@ Lägg till i `claude_desktop_config.json`:
 }
 ```
 
-Starta om Claude Desktop efter ändring.
+## Filer
+
+| Fil | Beskrivning |
+|-----|-------------|
+| `server.py` | MCP-servern som exponerar verktyg |
+| `client.py` | Enkel test-klient utan AI |
+| `ai_client.py` | AI-klient som kopplar Gemini till verktygen |
 
 ## Tillgängliga verktyg
 
