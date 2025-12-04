@@ -149,12 +149,101 @@ def create_over_budget_application():
     )
 
 
+def create_valid_sports_application():
+    create_grant_application(
+        filename=str(DATA_DIR / "valid_sports.pdf"),
+        name="Lars Eriksson",
+        organization="Stockholms Simsallskap",
+        org_number="802555-1234",
+        email="lars.eriksson@simsallskap.se",
+        phone="08-555 12 34",
+        project_name="Simskola for Nybörjare",
+        project_description="Vi vill starta en simskola for barn mellan 6-12 ar som inte kan simma. "
+                          "Projektet inkluderar utbildning av instruktorer, hyra av simhall och "
+                          "inkop av simutrustning. Malet ar att lara 200 barn att simma under aret.",
+        budget="80000",
+        requested_amount="60000"
+    )
+
+
+def create_missing_name_application():
+    create_grant_application(
+        filename=str(DATA_DIR / "missing_name.pdf"),
+        name="",  # Saknas!
+        organization="Foreningen Framtid",
+        org_number="802333-4567",
+        email="kontakt@framtid.se",
+        phone="070-999 88 77",
+        project_name="Mentorsprogram for Unga",
+        project_description="Ett mentorsprogram dar vuxna yrkesverksamma kopplas ihop med ungdomar "
+                          "som behover vagledning. Programmet loper over ett ar med regelbundna traffar "
+                          "och aktiviteter. Vi siktar pa att matcha 50 mentorspar.",
+        budget="45000",
+        requested_amount="30000"
+    )
+
+
+def create_bad_email_application():
+    create_grant_application(
+        filename=str(DATA_DIR / "bad_email.pdf"),
+        name="Karin Lundgren",
+        organization="Konstnarsnatet",
+        org_number="802444-5678",
+        email="karin.lundgren",  # Saknar @domän
+        phone="073-111 22 33",
+        project_name="Konstworkshop i Skolan",
+        project_description="Vi vill erbjuda konstworkshops i grundskolor dar eleverna far prova "
+                          "olika konstformer som malning, skulptur och grafik. Projektet genomfors "
+                          "i samarbete med lokala konstlärare och konstnärer.",
+        budget="35000",
+        requested_amount="25000"
+    )
+
+
+def create_bad_org_number_application():
+    create_grant_application(
+        filename=str(DATA_DIR / "bad_org_number.pdf"),
+        name="Peter Andersson",
+        organization="Musikforeningen Harmoni",
+        org_number="ABC123",  # Fel format
+        email="peter@musikharmoni.se",
+        phone="046-123 45 67",
+        project_name="Korlager for Vuxna",
+        project_description="Vi planerar ett korlager for vuxna amatorsangare med fokus pa flerstammig "
+                          "sang. Lagret genomfors under en helg med professionella korlärare. "
+                          "Vi raknar med 40 deltagare fran hela regionen.",
+        budget="55000",
+        requested_amount="40000"
+    )
+
+
+def create_short_description_application():
+    """Skapar en ansökan med för kort projektbeskrivning."""
+    create_grant_application(
+        filename=str(DATA_DIR / "short_description.pdf"),
+        name="Emma Nilsson",
+        organization="Dansforeningen",
+        org_number="802666-7890",
+        email="emma@dansforeningen.se",
+        phone="040-555 66 77",
+        project_name="Danskurs",
+        project_description="Vi vill ha en danskurs.",  # För kort!
+        budget="20000",
+        requested_amount="15000"
+    )
+
+
 if __name__ == "__main__":
     print("Skapar test-PDF:er...\n")
 
-    create_valid_application()
-    create_invalid_application()
-    create_partial_application()
-    create_over_budget_application()
+    # create_valid_application()
+    # create_invalid_application()
+    # create_partial_application()
+    # create_over_budget_application()
+    create_valid_sports_application()
+    create_missing_name_application()
+    create_bad_email_application()
+    create_bad_org_number_application()
+    create_short_description_application()
 
     print("\nKlart! Du kan nu validera dessa med main.py")

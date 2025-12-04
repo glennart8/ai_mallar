@@ -148,15 +148,19 @@ def print_validation_result(result: dict):
 if __name__ == "__main__":
     import time
     from pathlib import Path
+    
+    result = validate_pdf("data/invalid_application.pdf")
+    print_validation_result(result)
 
-    # Validera alla PDF:er i data-mappen
-    pdf_files = list(Path("data").glob("*.pdf"))
 
-    for i, pdf_file in enumerate(pdf_files):
-        print(f"\n {pdf_file.name}")
-        result = validate_pdf(str(pdf_file))
-        print_validation_result(result)
+    # # Validera alla PDF:er i data-mappen
+    # pdf_files = list(Path("data").glob("*.pdf"))
 
-        # Paus mellan anrop för att undvika rate limit
-        if i < len(pdf_files) - 1:
-            time.sleep(2)
+    # for i, pdf_file in enumerate(pdf_files):
+    #     print(f"\n {pdf_file.name}")
+    #     result = validate_pdf(str(pdf_file))
+    #     print_validation_result(result)
+
+    #     # Paus mellan anrop för att undvika rate limit
+    #     if i < len(pdf_files) - 1:
+    #         time.sleep(2)
